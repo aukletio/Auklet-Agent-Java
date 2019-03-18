@@ -5,8 +5,6 @@ import io.auklet.Auklet;
 import io.auklet.AukletException;
 import io.auklet.config.AukletIoBrokers;
 import io.auklet.config.AukletIoCert;
-import io.auklet.misc.Util;
-import io.auklet.misc.AukletDaemonExecutor;
 import net.jcip.annotations.ThreadSafe;
 import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
@@ -20,7 +18,6 @@ import java.io.IOException;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.concurrent.ScheduledExecutorService;
 
 /** <p>The default Auklet data sink, which sends data to {@code auklet.io} via MQTT.</p> */
 @ThreadSafe
@@ -28,7 +25,6 @@ public final class AukletIoSink extends AbstractSink {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AukletIoSink.class);
     private final Object lock = new Object();
-    private ScheduledExecutorService executorService;
     private MqttAsyncClient client;
 
     /**
@@ -45,12 +41,8 @@ public final class AukletIoSink extends AbstractSink {
             cert.start(agent);
             AukletIoBrokers brokers = new AukletIoBrokers();
             brokers.start(agent);
-            // Workaround to ensure that MQTT client threads do not stop JVM shutdown.
-            // https://github.com/eclipse/paho.mqtt.java/issues/402#issuecomment-424686340
-            // MQTT threads must be daemon threads or else the JVM will hang on shutdown.
-            this.executorService = new AukletDaemonExecutor(agent.getMqttThreads(), Util.createDaemonThreadFactory("AukletPahoMQTT-%d"));
             org.eclipse.paho.client.mqttv3.logging.LoggerFactory.setLogger("io.auklet.misc.PahoLogger");
-            this.client = new MqttAsyncClient(brokers.getUrl(), agent.getDeviceAuth().getClientId(), new MemoryPersistence(), new TimerPingSender(), executorService);
+            this.client = new MqttAsyncClient(brokers.getUrl(), agent.getDeviceAuth().getClientId(), new MemoryPersistence(), new TimerPingSender());
             this.client.setCallback(this.getCallback());
             this.client.setBufferOpts(this.getDisconnectBufferOptions(agent));
             // Wait 10 seconds for connect to succeed, then give up.
@@ -104,7 +96,6 @@ public final class AukletIoSink extends AbstractSink {
                     LOGGER.warn("Error while closing MQTT client.", e);
                 }
             }
-            Util.shutdown(this.executorService);
         }
     }
 

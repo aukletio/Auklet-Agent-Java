@@ -28,7 +28,7 @@ dependencies {
         exclude group: "junit"
     }
     compile "org.msgpack:msgpack-core:0.8.16"
-    compile "org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.0"
+    compile "org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.1"
     compile "org.slf4j:slf4j-api:1.7.25"
     compile "com.github.stephenc.jcip:jcip-annotations:1.0-1"
     // End-users never need to re-include this library in their list of dependencies, and those

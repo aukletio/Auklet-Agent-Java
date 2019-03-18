@@ -56,7 +56,6 @@ public final class Auklet {
     private final AbstractPlatform platform;
     private final File configDir;
     private final String serialPort;
-    private final int mqttThreads;
     private final String macHash;
     private final String ipAddress;
     private final AukletApi api;
@@ -122,11 +121,6 @@ public final class Auklet {
         this.serialPort = Util.getValue(config.getSerialPort(), "AUKLET_SERIAL_PORT", "auklet.serial.port");
         Object androidContext = config.getAndroidContext();
         if (androidContext != null && serialPort != null) throw new AukletException("Auklet can not use serial port when on an Android platform.");
-
-        Integer mqttThreadsFromConfigMaybeNull = Util.getValue(config.getMqttThreads(), "AUKLET_THREADS_MQTT", "auklet.threads.mqtt");
-        int mqttThreadsFromConfig = mqttThreadsFromConfigMaybeNull == null ? 3 : mqttThreadsFromConfigMaybeNull;
-        if (mqttThreadsFromConfig < 1) mqttThreadsFromConfig = 3;
-        this.mqttThreads = mqttThreadsFromConfig;
 
         LOGGER.debug("Getting IP/MAC address.");
         this.macHash = Util.getMacAddressHash();
@@ -335,13 +329,6 @@ public final class Auklet {
     @CheckForNull public String getSerialPort() {
         return this.serialPort;
     }
-
-    /**
-     * <p>Returns the number of MQTT threads that will be used by this instance of the agent.</p>
-     *
-     * @return never less than 1.
-     */
-    public int getMqttThreads() { return this.mqttThreads; }
 
     /**
      * <p>Returns the MAC address hash for this instance of the agent.</p>

@@ -124,18 +124,6 @@ import net.jcip.annotations.NotThreadSafe;
  *       </td>
  *       <td>{@code null} (Auklet will not write data to any serial port)</td>
  *     </tr>
- *     <tr>
- *       <td>Number of MQTT threads</td>
- *       <td>{@link #setMqttThreads(Integer)}</td>
- *       <td>
- *         <ol>
- *           <li>Setter method value</li>
- *           <li>Environment variable {@code AUKLET_THREADS_MQTT}</li>
- *           <li>JVM system property {@code auklet.threads.mqtt}</li>
- *         </ol>
- *       </td>
- *       <td>3</td>
- *     </tr>
  *   </tbody>
  * </table>
  *
@@ -162,7 +150,6 @@ public final class Config {
     private Boolean uncaughtExceptionHandler = null;
     private String serialPort = null;
     private Object androidContext = null;
-    private Integer mqttThreads = null;
 
     /**
      * <p>Sets the Auklet agent's app ID.</p>
@@ -260,18 +247,6 @@ public final class Config {
         return this;
     }
 
-    /**
-     * <p>Tells the Auklet agent how many MQTT threads to use.</p>
-     *
-     * @param mqttThreads may be {@code null}. Values less than 1 are coerced to {@code null}.
-     * @return {@code this}.
-     */
-    @NonNull public Config setMqttThreads(@Nullable Integer mqttThreads) {
-        if (mqttThreads != null && mqttThreads < 1) mqttThreads = null;
-        this.mqttThreads = mqttThreads;
-        return this;
-    }
-
     /** <p>Returns the desired app ID.</p> */
     /*package*/ @CheckForNull String getAppId() {
         return appId;
@@ -309,8 +284,5 @@ public final class Config {
 
     /** <p>Returns the Android context.</p> */
     /*package*/ @CheckForNull Object getAndroidContext() { return androidContext; }
-
-    /** <p>Returns the desired number of MQTT threads.</p> */
-    /*package*/ @CheckForNull Integer getMqttThreads() { return mqttThreads; }
 
 }
