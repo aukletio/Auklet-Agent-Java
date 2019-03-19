@@ -1,4 +1,4 @@
-package io.auklet.agent;
+package io.auklet;
 
 public class JavaAgentTest {
 }

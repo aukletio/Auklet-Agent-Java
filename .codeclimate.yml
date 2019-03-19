@@ -1,3 +1,19 @@
----
-exclude_paths:
+version: "2"
+checks:
+  method-complexity:
+    config:
+      threshold: 10
+  method-lines:
+    config:
+      threshold: 50
+plugins:
+  sonar-java:
+    enabled: true
+    config:
+      minimum_severity: info
+      sonar.java.source: "7"
+      tests_patterns:
+        - src/test/**
+exclude_patterns:
 - .devops/
+- "**/PahoLogger.java"

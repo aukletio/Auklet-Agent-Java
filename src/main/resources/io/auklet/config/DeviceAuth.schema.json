@@ -1,0 +1,27 @@
+{
+  "type": "object",
+  "required": [
+    "organization",
+    "client_id",
+    "id",
+    "client_password"
+  ],
+  "properties": {
+    "organization": {
+      "type": "string",
+      "pattern": "^(.+)$"
+    },
+    "client_id": {
+      "type": "string",
+      "pattern": "^(.+)$"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^(.+)$"
+    },
+    "client_password": {
+      "type": "string",
+      "pattern": "^(.+)$"
+    }
+  }
+}

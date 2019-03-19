@@ -1,57 +1,108 @@
-buildscript {
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath group: 'org.whitesource', name: 'whitesource-gradle-plugin', version: '0.8'
-    }
-}
-
+// Plugins
 plugins {
     id 'java'
-    id 'com.github.johnrengelman.shadow' version '2.0.1'
     id 'maven'
     id 'maven-publish'
     id 'com.jfrog.bintray' version '1.8.4'
 }
 
-apply plugin: 'whitesource'
-
+// Project info
 group "${theGroup}"
 version "${theVersion}"
 description = 'Official Auklet SDK for Java and other JVM languages.'
 
-sourceCompatibility = '1.8'
-targetCompatibility = '1.8'
+// Java version
+sourceCompatibility = 7
+targetCompatibility = 7
 
+// Dependencies
 repositories {
     jcenter()
+    google()
 }
-
 dependencies {
-    compile "org.apache.httpcomponents:httpclient:4.5.5"
-    compile 'org.json:json:20180813'
-    compile "org.msgpack:jackson-dataformat-msgpack:0.8.16"
+    compile "com.squareup.okhttp3:okhttp:3.12.0"
+    compile "com.squareup.okhttp3:logging-interceptor:3.12.0"
+    compile("org.sharegov:mjson:1.4.1") {
+        // Junit is an accidental non-test-scoped dependency, so we need to exclude it.
+        exclude group: "junit"
+    }
+    compile "org.msgpack:msgpack-core:0.8.16"
     compile "org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.0"
     compile "org.slf4j:slf4j-api:1.7.25"
+    compile "com.github.stephenc.jcip:jcip-annotations:1.0-1"
+    // End-users never need to re-include this library in their list of dependencies, and those
+    // that do so may run into legal issues if they distribute it alongside an Oracle JRE/JDK.
+    // See https://stackoverflow.com/a/36198568 for details.
+    compileOnly "com.github.spotbugs:spotbugs-annotations:3.1.10"
+    compileOnly "com.github.purejavacomm:purejavacomm:1.0.1.RELEASE"
+    compileOnly "uk.org.lidalia:sysout-over-slf4j:1.0.2"
+    compileOnly("com.google.android:android:4.1.1.4") {
+        transitive = false
+    }
     testCompile "org.slf4j:slf4j-simple:1.7.25"
 }
 
+// Compilation configuration
+allprojects {
+    gradle.projectsEvaluated {
+        tasks.withType(JavaCompile) {
+            options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+        }
+    }
+}
+
+// Module export (compile-time Java 9+)
+if (JavaVersion.current().isJava9Compatible()) {
+    sourceSets {
+        moduleInfo {
+            java {
+                srcDir 'src/module-info/java'
+            }
+        }
+    }
+    compileModuleInfoJava {
+        sourceCompatibility = 9
+        targetCompatibility = 9
+        inputs.property("moduleName", 'io.auklet')
+        doFirst {
+            classpath += sourceSets.main.compileClasspath
+            options.compilerArgs = [
+                    '--module-path', classpath.asPath,
+                    '--add-modules', 'ALL-SYSTEM',
+                    '-d', sourceSets.main.output.classesDirs.asPath
+            ]
+        }
+    }
+} else {
+    sourceSets {
+        moduleInfo {}
+    }
+}
+
+// Test configuration
 test {
     testLogging.showStandardStreams = true
 }
 
+// Javadoc configuration
+javadoc {
+    source = sourceSets.main.allJava
+    classpath = configurations.compileClasspath
+}
+
+// Packaging configurations
 task sourcesJar(type: Jar, dependsOn: classes) {
     classifier = 'sources'
     from sourceSets.main.allSource
 }
-
 task javadocJar(type: Jar, dependsOn: javadoc) {
     classifier = 'javadoc'
     from javadoc.destinationDir
 }
-
 jar {
+    from sourceSets.main.output
+    from sourceSets.moduleInfo.output
     manifest {
         attributes(
             'Built-By': 'CircleCI',
@@ -59,10 +110,12 @@ jar {
             'Built-JDK': System.getProperty('java.version'),
             'Implementation-Version': version,
             'Implementation-Title': project.name,
+            'Sealed': 'true'
         )
     }
 }
 
+// Deployment configurations
 def pomConfig = {
     licenses {
         license {
@@ -75,7 +128,6 @@ def pomConfig = {
        url "https://github.com/aukletio/Auklet-Agent-Java"
     }
 }
-
 publishing {
     publications {
         AukletJavaAgent(MavenPublication) {
@@ -95,7 +147,6 @@ publishing {
         }
     }
 }
-
 bintray {
     user = System.getenv('BINTRAY_USER')
     key = System.getenv('BINTRAY_API_KEY')
