@@ -4,16 +4,39 @@
 
 **Implemented enhancements:**
 
+- Allow some tasks to be cancelled without logging [#58](https://github.com/aukletio/Auklet-Agent-Java/pull/58) ([rjenkinsjr](https://github.com/rjenkinsjr))
+- APM-1674: Add Message Key [#51](https://github.com/aukletio/Auklet-Agent-Java/pull/51) ([shogun656](https://github.com/shogun656))
+- Remove Optional shim library [#50](https://github.com/aukletio/Auklet-Agent-Java/pull/50) ([rjenkinsjr](https://github.com/rjenkinsjr))
+- Log base URL during agent init [#49](https://github.com/aukletio/Auklet-Agent-Java/pull/49) ([rjenkinsjr](https://github.com/rjenkinsjr))
+- APM-1724: Add support for Android [#48](https://github.com/aukletio/Auklet-Agent-Java/pull/48) ([shogun656](https://github.com/shogun656))
+- APM-1695: Refactor codebase [#43](https://github.com/aukletio/Auklet-Agent-Java/pull/43) ([rjenkinsjr](https://github.com/rjenkinsjr))
+- Adding readme graphic & code climate maintainability [#36](https://github.com/aukletio/Auklet-Agent-Java/pull/36) ([bleib1dj](https://github.com/bleib1dj))
+- APM-1668: Java USB Communication [#33](https://github.com/aukletio/Auklet-Agent-Java/pull/33) ([shogun656](https://github.com/shogun656))
+- APM-1605: Device Configuration Integration [#32](https://github.com/aukletio/Auklet-Agent-Java/pull/32) ([shogun656](https://github.com/shogun656))
 - APM-1673: Replace simple-json with JSON-Java [#31](https://github.com/aukletio/Auklet-Agent-Java/pull/31) ([shogun656](https://github.com/shogun656))
 - APM-1645: Add custom logging of handled exception events  [#25](https://github.com/aukletio/Auklet-Agent-Java/pull/25) ([npalaska](https://github.com/npalaska))
 
 **Fixed bugs:**
 
+- Make JMI class requirement optional [#56](https://github.com/aukletio/Auklet-Agent-Java/pull/56) ([rjenkinsjr](https://github.com/rjenkinsjr))
+- Make init/shutdown more defensive [#54](https://github.com/aukletio/Auklet-Agent-Java/pull/54) ([rjenkinsjr](https://github.com/rjenkinsjr))
+- Log exceptions from Auklet daemon tasks [#52](https://github.com/aukletio/Auklet-Agent-Java/pull/52) ([rjenkinsjr](https://github.com/rjenkinsjr))
+- Miscellaneous bugfixes [#47](https://github.com/aukletio/Auklet-Agent-Java/pull/47) ([rjenkinsjr](https://github.com/rjenkinsjr))
+- Revert "Spark debugging with extra logging and synchronous MQTT client" [#42](https://github.com/aukletio/Auklet-Agent-Java/pull/42) ([npalaska](https://github.com/npalaska))
+- Spark debugging with extra logging and synchronous MQTT client [#41](https://github.com/aukletio/Auklet-Agent-Java/pull/41) ([npalaska](https://github.com/npalaska))
+- APM-1697: Fix Mqtt publish error and agent hung problem [#40](https://github.com/aukletio/Auklet-Agent-Java/pull/40) ([npalaska](https://github.com/npalaska))
+- support for an arbitrary dir for config files [#39](https://github.com/aukletio/Auklet-Agent-Java/pull/39) ([npalaska](https://github.com/npalaska))
+- Fix constant config refresh [#38](https://github.com/aukletio/Auklet-Agent-Java/pull/38) ([shogun656](https://github.com/shogun656))
 - APM-1649: Add slf4j logging in Auklet agent code [#29](https://github.com/aukletio/Auklet-Agent-Java/pull/29) ([npalaska](https://github.com/npalaska))
 - send the complete exception message [#28](https://github.com/aukletio/Auklet-Agent-Java/pull/28) ([npalaska](https://github.com/npalaska))
 
 **DevOps changes:**
 
+- Remove shadow JAR plugin [#53](https://github.com/aukletio/Auklet-Agent-Java/pull/53) ([rjenkinsjr](https://github.com/rjenkinsjr))
+- Remove WhiteSource gradle plugin [#46](https://github.com/aukletio/Auklet-Agent-Java/pull/46) ([rjenkinsjr](https://github.com/rjenkinsjr))
+- Fix WhiteSource analysis [#45](https://github.com/aukletio/Auklet-Agent-Java/pull/45) ([rjenkinsjr](https://github.com/rjenkinsjr))
+- Switch to WhiteSource Unified Agent [#44](https://github.com/aukletio/Auklet-Agent-Java/pull/44) ([rjenkinsjr](https://github.com/rjenkinsjr))
+- APM-1643: add Code Climate/SonarJava for static analysis [#37](https://github.com/aukletio/Auklet-Agent-Java/pull/37) ([rjenkinsjr](https://github.com/rjenkinsjr))
 - Update instructions for bug reports [#34](https://github.com/aukletio/Auklet-Agent-Java/pull/34) ([rjenkinsjr](https://github.com/rjenkinsjr))
 
 ## [0.2.1](https://github.com/aukletio/Auklet-Agent-Java/tree/0.2.1)
