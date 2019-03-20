@@ -1,0 +1,63 @@
+{
+  "type": "object",
+  "required": [
+    "config"
+  ],
+  "properties": {
+    "config": {
+      "type": "object",
+      "required": [
+        "features",
+        "data",
+        "storage",
+        "emission_period"
+      ],
+      "properties": {
+        "features": {
+          "type": "object",
+          "required": [
+            "performance_metrics",
+            "user_metrics"
+          ],
+          "properties": {
+            "performance_metrics": {
+              "type": "boolean"
+            },
+            "user_metrics": {
+              "type": "boolean"
+            }
+          }
+        },
+        "data": {
+          "type": "object",
+          "required": [
+            "cellular_data_limit",
+            "normalized_cell_plan_date"
+          ],
+          "properties": {
+            "cellular_data_limit": {
+              "type": ["integer", "null"]
+            },
+            "normalized_cell_plan_date": {
+              "type": "integer"
+            }
+          }
+        },
+        "storage": {
+          "type": "object",
+          "required": [
+            "storage_limit"
+          ],
+          "properties": {
+            "storage_limit": {
+              "type": ["integer", "null"]
+            }
+          }
+        },
+        "emission_period": {
+          "type": "integer"
+        }
+      }
+    }
+  }
+}
