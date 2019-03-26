@@ -6,6 +6,8 @@ import android.os.Build;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
+import io.auklet.AukletException;
+import net.jcip.annotations.ThreadSafe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,86 +16,97 @@ import java.io.FileReader;
 import java.io.IOException;
 
 /**
- * <p>This class handles retrieving the memory and cpu usage for Android devices.</p>
+ * <p>This class handles retrieving memory and CPU usage for Android devices.</p>
  *
- * <p>cpu usage can only be retrieved for devices running on Android 7 or older. If your device is running on
- * something newer than Android 7, then the cpu usage will return 0.</p>
+ * <p>CPU usage can only be retrieved on Android 7 or lower. When running on Android 8+,
+ * this class will always report {@code 0} for CPU usage.</p>
  */
+@ThreadSafe
 public final class AndroidMetrics {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AndroidMetrics.class);
-    private ActivityManager.MemoryInfo memInfo = new ActivityManager.MemoryInfo();
-    private ActivityManager manager;
+    private final ActivityManager activityManager;
 
-    private long total;
-    private long totalBefore;
-    private long totalDiff;
-    private long work;
-    private long workBefore;
-    private long workDiff;
+    private final Object lock = new Object();
+    private long total = 0L;
+    private long totalBefore = 0L;
+    private long totalDiff = 0L;
+    private long work = 0L;
+    private long workBefore = 0L;
+    private long workDiff = 0L;
     private float cpuUsage = 0;
 
     /**
-     * <p>Constructor that creates the Activity Manager in order to be able to calculate the memory used in android.
-     * Also initializes global variables used for calculating cpu usage</p>
+     * <p>Constructor.</p>
      *
      * @param context the Android context.
+     * @throws AukletException if context is {@code null}.
      */
-    public AndroidMetrics(Context context) {
-        LOGGER.debug("We are unable to attain cpu data on devices running Android 8+");
-        manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-        manager.getMemoryInfo(memInfo);
-        total = totalBefore = totalDiff = work = workBefore = workDiff = 0L;
+    public AndroidMetrics(@NonNull Context context) throws AukletException {
+        if (context == null) throw new AukletException("Android context is null.");
+        if (Build.VERSION.SDK_INT >= 26) LOGGER.warn("Running on Android 8 or higher; system CPU stats will not be available.");
+        this.activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
     }
 
+    /**
+     * <p>Returns a runnable task that periodically gets system CPU usage from the
+     * Android device on which the agent is running. Android has no APIs available to
+     * obtain this information, so we have to use a background thread to read the
+     * {@code /proc/stat} file.</p>
+     *
+     * @return {@code null} iff running on Android 8 or higher, in which case no
+     * background task will be executed.
+     */
     @Nullable public Runnable calculateCpuUsage() {
-        // On Android 8+, Google has restricted access to the proc files
-        if (Build.VERSION.SDK_INT < 26) {
-            return new Runnable() {
-                @Override
-                public void run() {
-                    try (BufferedReader reader = new BufferedReader(new FileReader("/proc/stat"))) {
-                        // Obtain current CPU Load
-                        String[] s = reader.readLine().split("[ ]+", 9);
-                        work = Long.parseLong(s[1]) + Long.parseLong(s[2]) + Long.parseLong(s[3]);
-                        total = work + Long.parseLong(s[4]) + Long.parseLong(s[5]) +
-                                Long.parseLong(s[6]) + Long.parseLong(s[7]);
-                    } catch (IOException e) {
-                        LOGGER.error("Unable to obtain cpu usage", e);
-                        return;
-                    }
-
+        if (Build.VERSION.SDK_INT >= 26) return null;
+        return new Runnable() {
+            @Override
+            public void run() {
+                // Obtain current CPU load.
+                String[] s;
+                try (BufferedReader reader = new BufferedReader(new FileReader("/proc/stat"))) {
+                    s = reader.readLine().split("[ ]+", 9);
+                } catch (IOException e) {
+                    LOGGER.warn("Unable to obtain CPU usage", e);
+                    return;
+                }
+                synchronized (lock) {
+                    work = Long.parseLong(s[1]) + Long.parseLong(s[2]) + Long.parseLong(s[3]);
+                    total = work + Long.parseLong(s[4]) + Long.parseLong(s[5]) +
+                            Long.parseLong(s[6]) + Long.parseLong(s[7]);
                     // Calculate CPU Percentage
                     if (totalBefore != 0) {
                         workDiff = work - workBefore;
                         totalDiff = total - totalBefore;
                         cpuUsage = workDiff * 100 / (float) totalDiff;
                     }
-
                     totalBefore = total;
                     workBefore = work;
                 }
-            };
-        }
-
-        return null;
+            }
+        };
     }
 
-    /** <p>Returns the memory Uuage for this Android device.</p>
+    /**
+     * <p>Returns the memory usage of the OS on which this agent is running.</p>
      *
-     * @return the memory usage for android.
+     * @return a non-negative value.
      */
-    @NonNull public double getMemoryUsage() {
-        // memInfo.totalMem needs API 16+
+    public double getMemoryUsage() {
+        ActivityManager.MemoryInfo memInfo = new ActivityManager.MemoryInfo();
+        activityManager.getMemoryInfo(memInfo);
         return memInfo.availMem / (double) memInfo.totalMem * 100.0;
     }
 
-    /** <p>Returns the cpu usage for this Android device. Return 0 if Android 8+.</p>
+    /**
+     * <p>Returns the CPU usage of the OS on which this agent is running.</p>
      *
-     * @return the cpu usage for android.
+     * @return a non-negative value. If running on Android 8 or higher, will always be zero.
      */
-    @NonNull public float getCpuUsage() {
-        return cpuUsage;
+    public float getCpuUsage() {
+        synchronized (lock) {
+            return cpuUsage;
+        }
     }
 
 }

@@ -6,7 +6,7 @@ import io.auklet.AukletException;
 import io.auklet.misc.AukletDaemonExecutor;
 import io.auklet.misc.Util;
 import mjson.Json;
-import net.jcip.annotations.NotThreadSafe;
+import net.jcip.annotations.ThreadSafe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,10 +15,10 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
- * <p>The <i>data usage tracker file</i> is used to persist between restarts the amount of data that has
- * been sent by the Auklet agent to the sink.</p>
+ * <p>This config file persists between agent restarts the amount of data that has been sent by
+ * the Auklet agent to the sink, pursuant to the defined {@link DataUsageLimit}.</p>
  */
-@NotThreadSafe
+@ThreadSafe
 public final class DataUsageTracker extends AbstractConfigFile {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DataUsageTracker.class);
@@ -53,7 +53,11 @@ public final class DataUsageTracker extends AbstractConfigFile {
      *
      * @return the number of bytes sent.
      */
-    public long getBytesSent() { return this.bytesSent; }
+    public long getBytesSent() {
+        synchronized (lock) {
+            return this.bytesSent;
+        }
+    }
 
     /**
      * <p>Adds the input number of bytes to the current amount of bytes sent.</p>
@@ -62,14 +66,18 @@ public final class DataUsageTracker extends AbstractConfigFile {
      */
     public void addMoreData(long moreBytes) {
         if (moreBytes < 1) return;
-        this.bytesSent += moreBytes;
-        this.saveUsage(this.bytesSent);
+        synchronized (lock) {
+            this.bytesSent += moreBytes;
+            this.saveUsage(this.bytesSent);
+        }
     }
 
     /** <p>Resets the data usage to zero.</p> */
     public void reset() {
-        this.bytesSent = 0L;
-        this.saveUsage(this.bytesSent);
+        synchronized (lock) {
+            this.bytesSent = 0L;
+            this.saveUsage(this.bytesSent);
+        }
     }
 
     /**
@@ -80,24 +88,22 @@ public final class DataUsageTracker extends AbstractConfigFile {
     private void saveUsage(final long givenUsage) {
         try {
             // If there is already a pending write task, cancel it.
-            synchronized (this.lock) {
-                if (this.currentWriteTask != null) currentWriteTask.cancel(false);
-                // Queue the new write task.
-                this.currentWriteTask = this.getAgent().scheduleOneShotTask(new AukletDaemonExecutor.CancelSilentlyRunnable() {
-                    @Override
-                    public void run() {
-                        // This task is no longer pending, so clear its status.
-                        synchronized (lock) {
-                            currentWriteTask = null;
-                        }
-                        try {
-                            writeUsageToDisk(givenUsage);
-                        } catch (IOException | SecurityException e) {
-                            LOGGER.warn("Could not save data usage to disk.", e);
-                        }
+            if (this.currentWriteTask != null) currentWriteTask.cancel(false);
+            // Queue the new write task.
+            this.currentWriteTask = this.getAgent().scheduleOneShotTask(new AukletDaemonExecutor.CancelSilentlyRunnable() {
+                @Override
+                public void run() {
+                    // This task is no longer pending, so clear its status.
+                    synchronized (lock) {
+                        currentWriteTask = null;
                     }
-                }, 5, TimeUnit.SECONDS); // 5-second cooldown.
-            }
+                    try {
+                        writeUsageToDisk(givenUsage);
+                    } catch (IOException | SecurityException e) {
+                        LOGGER.warn("Could not save data usage to disk.", e);
+                    }
+                }
+            }, 5, TimeUnit.SECONDS); // 5-second cooldown.
         } catch (AukletException e) {
             LOGGER.warn("Could not queue data usage save task.", e);
         }

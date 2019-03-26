@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.concurrent.ScheduledExecutorService;
 
 /** <p>The default Auklet data sink, which sends data to {@code auklet.io} via MQTT.</p> */
 @ThreadSafe
@@ -28,7 +27,7 @@ public final class AukletIoSink extends AbstractSink {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AukletIoSink.class);
     private final Object lock = new Object();
-    private ScheduledExecutorService executorService;
+    private AukletDaemonExecutor executorService;
     private MqttAsyncClient client;
 
     /**
@@ -83,11 +82,15 @@ public final class AukletIoSink extends AbstractSink {
             super.shutdown();
             if (this.client != null) {
                 if (this.client.isConnected()) {
+                    this.executorService.logCancelExceptions(false);
                     try {
                         // Wait 2 seconds for work to quiesce and 1 second for disconnect to finish.
                         this.client.disconnect(2000L).waitForCompletion(1000L);
                     } catch (MqttException e) {
-                        LOGGER.warn("Error while disconnecting MQTT client.", e);
+                        // TODO remove this conditional after upgrading Paho to fix this
+                        if (!e.getMessage().equals("Timed out waiting for a response from the server")) {
+                            LOGGER.warn("Error while disconnecting MQTT client.", e);
+                        }
                         try {
                             // Do not wait for work to quiesce.
                             // Wait 1ms to disconnect (effectively do not wait, but if we say 0ms

@@ -20,7 +20,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.concurrent.*;
-import java.util.jar.Manifest;
 
 /**
  * <p>The entry point for the Auklet agent for Java and related languages/platforms.</p>
@@ -48,7 +47,7 @@ public final class Auklet {
     public static final String VERSION;
     private static final Logger LOGGER = LoggerFactory.getLogger(Auklet.class);
     private static final Object LOCK = new Object();
-    private static final ScheduledExecutorService DAEMON = new AukletDaemonExecutor(1, Util.createDaemonThreadFactory("Auklet"));
+    private static final AukletDaemonExecutor DAEMON = new AukletDaemonExecutor(1, Util.createDaemonThreadFactory("Auklet"));
     private static Auklet agent = null;
 
     private final String appId;
@@ -66,18 +65,14 @@ public final class Auklet {
     private final Thread shutdownHook;
 
     static {
-        // Extract Auklet agent version from the manifest.
+        // Extract Auklet agent version from the BuildConfig class.
         String version = "unknown";
-        try (InputStream manifestStream = Auklet.class.getClassLoader().getResourceAsStream("META-INF/MANIFEST.MF")) {
-            if (manifestStream != null) {
-                Manifest manifest = new Manifest(manifestStream);
-                version = manifest.getMainAttributes().getValue("Implementation-Version");
-                version = Util.orElse(version, "unknown");
-            }
-            LOGGER.info("Auklet Agent version {}", version);
-        } catch (SecurityException | IOException e) {
+        try {
+            version = BuildConfig.AGENT_VERSION;
+        } catch (RuntimeException | NoClassDefFoundError e) {
             LOGGER.warn("Could not obtain Auklet agent version from manifest.", e);
         }
+        LOGGER.info("Auklet Agent version {}", version);
         VERSION = version;
         // Initialize the Auklet agent if requested via env var or JVM sysprop.
         String fromEnv = System.getenv("AUKLET_AUTO_START");
@@ -142,7 +137,7 @@ public final class Auklet {
             this.platform = new AndroidPlatform(androidContext);
         }
         this.configDir = platform.obtainConfigDir(Util.getValue(config.getConfigDir(), "AUKLET_CONFIG_DIR", "auklet.config.dir"));
-        if (configDir == null) throw new AukletException("Could not find or create any config directory; see previous logged errors for details");
+        if (configDir == null) throw new AukletException("Could not find or create any config directory; see previous logged errors for details.");
 
         LOGGER.debug("Configuring agent resources.");
         this.api = new AukletApi(apiKey);
@@ -285,8 +280,11 @@ public final class Auklet {
                         LOGGER.debug("Ignoring shutdown request because agent is null.");
                         return;
                     }
+                    // Do not log cancelled tasks during shutdown.
+                    DAEMON.logCancelExceptions(false);
                     agent.doShutdown(false);
                     agent = null;
+                    DAEMON.logCancelExceptions(true);
                 }
             }
         };

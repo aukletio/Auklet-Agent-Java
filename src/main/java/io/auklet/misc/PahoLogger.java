@@ -1,5 +1,7 @@
 package io.auklet.misc;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import net.jcip.annotations.NotThreadSafe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,13 +20,14 @@ import java.util.*;
  * <p>These loggers are designed to work with JUL resource bundles, but do not require them.</p>
  */
 @NotThreadSafe
+@SuppressWarnings("unused")
 public final class PahoLogger implements org.eclipse.paho.client.mqttv3.logging.Logger {
 
     private Logger logger = null;
     private ResourceBundle bundle;
     private String context;
 
-    @Override public void initialise(ResourceBundle messageCatalog, String loggerID, String resourceName) {
+    @Override public void initialise(@Nullable ResourceBundle messageCatalog, @NonNull String loggerID, @Nullable String resourceName) {
         if (loggerID == null) throw new IllegalArgumentException("loggerID is null.");
         logger = LoggerFactory.getLogger(loggerID);
         bundle = messageCatalog;
@@ -32,7 +35,7 @@ public final class PahoLogger implements org.eclipse.paho.client.mqttv3.logging.
     }
 
     @Override
-    public void setResourceName(String logContext) { context = logContext; }
+    public void setResourceName(@Nullable String logContext) { context = logContext; }
 
     @Override public boolean isLoggable(int level) {
         switch (level) {
@@ -54,101 +57,101 @@ public final class PahoLogger implements org.eclipse.paho.client.mqttv3.logging.
         }
     }
 
-    @Override public void severe(String sourceClass, String sourceMethod, String msg) {
+    @Override public void severe(@Nullable String sourceClass, @Nullable String sourceMethod, @Nullable String msg) {
         log(SEVERE, sourceClass, sourceMethod, msg, null, null);
     }
 
-    @Override public void severe(String sourceClass, String sourceMethod, String msg, Object[] inserts) {
+    @Override public void severe(@Nullable String sourceClass, @Nullable String sourceMethod, @Nullable String msg, @Nullable Object[] inserts) {
         log(SEVERE, sourceClass, sourceMethod, msg, inserts, null);
     }
 
-    @Override public void severe(String sourceClass, String sourceMethod, String msg, Object[] inserts, Throwable thrown) {
+    @Override public void severe(@Nullable String sourceClass, @Nullable String sourceMethod, @Nullable String msg, @Nullable Object[] inserts, @Nullable Throwable thrown) {
         log(SEVERE, sourceClass, sourceMethod, msg, inserts, thrown);
     }
 
-    @Override public void warning(String sourceClass, String sourceMethod, String msg) {
+    @Override public void warning(@Nullable String sourceClass, @Nullable String sourceMethod, @Nullable String msg) {
         log(WARNING, sourceClass, sourceMethod, msg, null, null);
     }
 
-    @Override public void warning(String sourceClass, String sourceMethod, String msg, Object[] inserts) {
+    @Override public void warning(@Nullable String sourceClass, @Nullable String sourceMethod, @Nullable String msg, @Nullable Object[] inserts) {
         log(WARNING, sourceClass, sourceMethod, msg, inserts, null);
     }
 
-    @Override public void warning(String sourceClass, String sourceMethod, String msg, Object[] inserts, Throwable thrown) {
+    @Override public void warning(@Nullable String sourceClass, @Nullable String sourceMethod, @Nullable String msg, @Nullable Object[] inserts, @Nullable Throwable thrown) {
         log(WARNING, sourceClass, sourceMethod, msg, inserts, thrown);
     }
 
-    @Override public void info(String sourceClass, String sourceMethod, String msg) {
+    @Override public void info(@Nullable String sourceClass, @Nullable String sourceMethod, @Nullable String msg) {
         log(INFO, sourceClass, sourceMethod, msg, null, null);
     }
 
-    @Override public void info(String sourceClass, String sourceMethod, String msg, Object[] inserts) {
+    @Override public void info(@Nullable String sourceClass, @Nullable String sourceMethod, @Nullable String msg, @Nullable Object[] inserts) {
         log(INFO, sourceClass, sourceMethod, msg, inserts, null);
     }
 
-    @Override public void info(String sourceClass, String sourceMethod, String msg, Object[] inserts, Throwable thrown) {
+    @Override public void info(@Nullable String sourceClass, @Nullable String sourceMethod, @Nullable String msg, @Nullable Object[] inserts, @Nullable Throwable thrown) {
         log(INFO, sourceClass, sourceMethod, msg, inserts, thrown);
     }
 
-    @Override public void config(String sourceClass, String sourceMethod, String msg) {
+    @Override public void config(@Nullable String sourceClass, @Nullable String sourceMethod, @Nullable String msg) {
         log(CONFIG, sourceClass, sourceMethod, msg, null, null);
     }
 
-    @Override public void config(String sourceClass, String sourceMethod, String msg, Object[] inserts) {
+    @Override public void config(@Nullable String sourceClass, @Nullable String sourceMethod, @Nullable String msg, @Nullable Object[] inserts) {
         log(CONFIG, sourceClass, sourceMethod, msg, inserts, null);
     }
 
-    @Override public void config(String sourceClass, String sourceMethod, String msg, Object[] inserts, Throwable thrown) {
+    @Override public void config(@Nullable String sourceClass, @Nullable String sourceMethod, @Nullable String msg, @Nullable Object[] inserts, @Nullable Throwable thrown) {
         log(CONFIG, sourceClass, sourceMethod, msg, inserts, thrown);
     }
 
-    @Override public void fine(String sourceClass, String sourceMethod, String msg) {
+    @Override public void fine(@Nullable String sourceClass, @Nullable String sourceMethod, @Nullable String msg) {
         trace(FINE, sourceClass, sourceMethod, msg, null, null);
     }
 
-    @Override public void fine(String sourceClass, String sourceMethod, String msg, Object[] inserts) {
+    @Override public void fine(@Nullable String sourceClass, @Nullable String sourceMethod, @Nullable String msg, @Nullable Object[] inserts) {
         trace(FINE, sourceClass, sourceMethod, msg, inserts, null);
     }
 
-    @Override public void fine(String sourceClass, String sourceMethod, String msg, Object[] inserts, Throwable ex) {
+    @Override public void fine(@Nullable String sourceClass, @Nullable String sourceMethod, @Nullable String msg, @Nullable Object[] inserts, @Nullable Throwable ex) {
         trace(FINE, sourceClass, sourceMethod, msg, inserts, ex);
     }
 
-    @Override public void finer(String sourceClass, String sourceMethod, String msg) {
+    @Override public void finer(@Nullable String sourceClass, @Nullable String sourceMethod, @Nullable String msg) {
         trace(FINER, sourceClass, sourceMethod, msg, null, null);
     }
 
-    @Override public void finer(String sourceClass, String sourceMethod, String msg, Object[] inserts) {
+    @Override public void finer(@Nullable String sourceClass, @Nullable String sourceMethod, @Nullable String msg, @Nullable Object[] inserts) {
         trace(FINER, sourceClass, sourceMethod, msg, inserts, null);
     }
 
-    @Override public void finer(String sourceClass, String sourceMethod, String msg, Object[] inserts, Throwable ex) {
+    @Override public void finer(@Nullable String sourceClass, @Nullable String sourceMethod, @Nullable String msg, @Nullable Object[] inserts, @Nullable Throwable ex) {
         trace(FINER, sourceClass, sourceMethod, msg, inserts, ex);
     }
 
-    @Override public void finest(String sourceClass, String sourceMethod, String msg) {
+    @Override public void finest(@Nullable String sourceClass, @Nullable String sourceMethod, @Nullable String msg) {
         trace(FINEST, sourceClass, sourceMethod, msg, null, null);
     }
 
-    @Override public void finest(String sourceClass, String sourceMethod, String msg, Object[] inserts) {
+    @Override public void finest(@Nullable String sourceClass, @Nullable String sourceMethod, @Nullable String msg, @Nullable Object[] inserts) {
         trace(FINEST, sourceClass, sourceMethod, msg, inserts, null);
     }
 
-    @Override public void finest(String sourceClass, String sourceMethod, String msg, Object[] inserts, Throwable ex) {
+    @Override public void finest(@Nullable String sourceClass, @Nullable String sourceMethod, @Nullable String msg, @Nullable Object[] inserts, @Nullable Throwable ex) {
         trace(FINEST, sourceClass, sourceMethod, msg, inserts, ex);
     }
 
     @Override
-    public void log(int level, String sourceClass, String sourceMethod, String msg, Object[] inserts, Throwable thrown) {
+    public void log(int level, @Nullable String sourceClass, @Nullable String sourceMethod, @Nullable String msg, @Nullable Object[] inserts, @Nullable Throwable thrown) {
         logToSlf4j(level, sourceClass, sourceMethod, msg, inserts, thrown);
     }
 
     @Override
-    public void trace(int level, String sourceClass, String sourceMethod, String msg, Object[] inserts, Throwable ex) {
+    public void trace(int level, @Nullable String sourceClass, @Nullable String sourceMethod, @Nullable String msg, @Nullable Object[] inserts, @Nullable Throwable ex) {
         logToSlf4j(level, sourceClass, sourceMethod, msg, inserts, ex);
     }
 
-    private void logToSlf4j(int level, String sourceClass, String sourceMethod, String msg, Object[] inserts, Throwable throwable) {
+    private void logToSlf4j(int level, @Nullable String sourceClass, @Nullable String sourceMethod, @Nullable String msg, @Nullable Object[] inserts, @Nullable Throwable throwable) {
         if (!isLoggable(level)) return;
         StringBuilder message = new StringBuilder();
         if (!Util.isNullOrEmpty(sourceClass)) {
@@ -187,16 +190,16 @@ public final class PahoLogger implements org.eclipse.paho.client.mqttv3.logging.
     }
 
     /**
-     * <p>This method is unused in the built-in JSR47 implementation, and thus is unsed here as well;
+     * <p>This method is unused in the built-in JSR47 implementation, and thus is unused here as well;
      * it is overridden here for completeness.</p>
      *
      * @param msg unused.
      * @param inserts unused.
      * @return {@code null}.
      */
-    @Override public String formatMessage(String msg, Object[] inserts) { return null; }
+    @Override public String formatMessage(@Nullable String msg, @Nullable Object[] inserts) { return null; }
 
-    /** <p>This method is specific to JUL logging, and thus does nothing</p> */
+    /** <p>This method is specific to JUL logging, and thus does nothing.</p> */
     @Override public void dumpTrace() {}
 
 }

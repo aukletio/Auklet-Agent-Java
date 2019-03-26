@@ -16,9 +16,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-/**
- * <p>Descendants of this class implement platform specific helper functions.</p>
- */
+/** <p>Provides logic common to all platforms.</p> */
 public abstract class AbstractPlatform extends HasAgent implements Platform {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractPlatform.class);
@@ -57,16 +55,16 @@ public abstract class AbstractPlatform extends HasAgent implements Platform {
     }
 
     /**
-     * <p>Determines the possible config directories Auklet can use based on the underlying platform.</p>
+     * <p>Determines the possible config directories that can be used by the agent.</p>
      *
      * @param fromConfig the value from the {@link Config} object, env var and/or JVM sysprop, possibly
      * {@code null}.
-     * @return the list of possible config directories that we are able to use
+     * @return the list of possible config directories that can be used on this platform.
      */
     @NonNull protected abstract List<String> getPossibleConfigDirs(@Nullable String fromConfig);
 
     /**
-     * <p>Checks the directory for write permissions or it attempts to create the directory, or it gives up.</p>
+     * <p>Checks the directory for write permissions, or attempts to create the directory, or gives up.</p>
      *
      * @param possibleConfigDir the directory that needs to be checked for write permissions.
      * @return possibly {@code null}, in which case the Auklet agent must throw an exception during

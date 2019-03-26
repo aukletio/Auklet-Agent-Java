@@ -79,7 +79,7 @@ public final class SerialPortSink extends AbstractSink {
                 this.getAgent().getUsageMonitor().addMoreData(size);
             }
         } catch (IOException e) {
-            throw new AukletException("Could not write data to serial port", e);
+            throw new AukletException("Could not write data to serial port.", e);
         }
     }
 

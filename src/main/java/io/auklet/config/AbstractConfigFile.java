@@ -11,6 +11,9 @@ import java.io.File;
 /**
  * <p>Descendants of this class represent a configuration file located inside the Auklet agent's
  * configuration directory.</p>
+ *
+ * <p>This class is not inherently thread-safe, but any subclasses that fully synchronize access
+ * to the file object can be thread-safe.</p>
  */
 @NotThreadSafe
 public abstract class AbstractConfigFile extends HasAgent {

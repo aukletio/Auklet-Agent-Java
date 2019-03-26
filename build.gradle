@@ -1,6 +1,8 @@
 // Plugins
 plugins {
+    id 'idea'
     id 'java'
+    id 'com.github.gmazzo.buildconfig' version '1.3.6'
     id 'maven'
     id 'maven-publish'
     id 'com.jfrog.bintray' version '1.8.4'
@@ -10,6 +12,19 @@ plugins {
 group "${theGroup}"
 version "${theVersion}"
 description = 'Official Auklet SDK for Java and other JVM languages.'
+buildConfig {
+    buildConfigField('String', 'AGENT_VERSION', "\"${version}\"")
+}
+generateBuildConfig {
+    addGeneratedAnnotation = false
+}
+
+// IDE configuration
+idea {
+    module {
+        generatedSourceDirs += file('build/generated/source/buildConfig/main')
+    }
+}
 
 // Java version
 sourceCompatibility = 7

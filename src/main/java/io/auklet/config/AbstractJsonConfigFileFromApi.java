@@ -24,7 +24,7 @@ public abstract class AbstractJsonConfigFileFromApi extends AbstractConfigFileFr
      * @throws AukletException if the request is {@code null}, or if the request fails or has an error.
      */
     @NonNull protected final Json makeJsonRequest(@NonNull Request.Builder request) throws AukletException {
-        if (request == null) throw new AukletException("JSON HTTP request is null");
+        if (request == null) throw new AukletException("JSON HTTP request is null.");
         try (Response response = this.getAgent().getApi().doRequest(request)) {
             String responseString = response.body().string();
             if (response.isSuccessful()) {
@@ -34,6 +34,15 @@ public abstract class AbstractJsonConfigFileFromApi extends AbstractConfigFileFr
             }
         } catch (IOException | IllegalArgumentException e) {
             throw new AukletException(String.format("Error while getting Auklet JSON config file '%s'.", this.getName()), e);
+        }
+    }
+
+    @Override protected void writeToDisk(@NonNull Json contents) throws AukletException {
+        if (contents == null) throw new AukletException("Input is null.");
+        try {
+            Util.writeUtf8(this.file, contents.toString());
+        } catch (IOException e) {
+            throw new AukletException("Could not save JSON file to disk.", e);
         }
     }
 
