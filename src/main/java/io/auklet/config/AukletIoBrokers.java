@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 
 /**
- * <p>This file contains MQTT connection information for sending data to {@code auklet.io}.</p>
+ * <p>This config file contains MQTT connection information for sending data to {@code auklet.io}.</p>
  */
 @NotThreadSafe
 public final class AukletIoBrokers extends AbstractJsonConfigFileFromApi {
@@ -56,11 +56,6 @@ public final class AukletIoBrokers extends AbstractJsonConfigFileFromApi {
                 .url(this.getAgent().getBaseUrl() + "/private/devices/config/").get()
                 .header("Content-Type", "application/json; charset=utf-8");
         return this.makeJsonRequest(request);
-    }
-
-    @Override protected void writeToDisk(@NonNull Json contents) throws AukletException {
-        if (contents == null) throw new AukletException("Input is null.");
-        Util.writeUtf8(this.file, contents.toString());
     }
 
 }

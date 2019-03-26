@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * <p>This class handles tracking of data usage, enforcement of data usage limits, and periodic refresh
- * of the data usage limit config.</p>
+ * of the {@link DataUsageLimit} config.</p>
  *
  * <p>The enforcement of the data usage limit provided by this class is fuzzy by nature; due to a lack
  * of OS integration to sniff all traffic that's being sent across the wire, this class will always

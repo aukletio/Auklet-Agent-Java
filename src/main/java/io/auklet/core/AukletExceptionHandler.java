@@ -1,5 +1,6 @@
 package io.auklet.core;
 
+import edu.umd.cs.findbugs.annotations.Nullable;
 import io.auklet.Auklet;
 import net.jcip.annotations.Immutable;
 import org.slf4j.Logger;
@@ -11,7 +12,7 @@ public final class AukletExceptionHandler implements Thread.UncaughtExceptionHan
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AukletExceptionHandler.class);
 
-    @Override public void uncaughtException(Thread t, Throwable e) {
+    @Override public void uncaughtException(@Nullable Thread t, @Nullable Throwable e) {
         if (e == null) return;
         if (!(e instanceof ThreadDeath)) {
             LOGGER.debug("Sending uncaught exception.");

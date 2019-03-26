@@ -16,7 +16,7 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
 /**
- * <p>This is the CA certificate for establishing SSL connections to the {@code auklet.io} data pipeline.</p>
+ * <p>This config file contains the MQTT CA certificate for {@code auklet.io}.</p>
  */
 @NotThreadSafe
 public final class AukletIoCert extends AbstractConfigFileFromApi<String> {
@@ -77,7 +77,11 @@ public final class AukletIoCert extends AbstractConfigFileFromApi<String> {
 
     @Override protected void writeToDisk(@NonNull String contents) throws AukletException {
         if (Util.isNullOrEmpty(contents)) throw new AukletException("Input is null or empty.");
-        Util.writeUtf8(this.file, contents);
+        try {
+            Util.writeUtf8(this.file, contents);
+        } catch (IOException e) {
+            throw new AukletException("Could not save MQTT CA cert to disk.", e);
+        }
     }
 
 }

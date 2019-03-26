@@ -90,8 +90,9 @@ public final class Util {
      *
      * @param file the file to write. No-op if {@code null}.
      * @param contents the string to write to the file. No-op if {@code null} or empty.
+     * @throws IOException if an I/O error occurs.
      */
-    public static void writeUtf8(@Nullable File file, @Nullable String contents) {
+    public static void writeUtf8(@Nullable File file, @Nullable String contents) throws IOException {
         if (file == null) return;
         if (isNullOrEmpty(contents)) return;
         try {
@@ -106,15 +107,16 @@ public final class Util {
      *
      * @param file the file to write. No-op if {@code null}.
      * @param bytes the bytes to write to the file. No-op if {@code null} or empty.
+     * @throws IOException if an I/O error occurs.
      */
-    public static void write(@Nullable File file, @Nullable byte[] bytes) {
+    public static void write(@Nullable File file, @Nullable byte[] bytes) throws IOException {
         if (file == null) return;
         if (bytes == null || bytes.length == 0) return;
         try (FileOutputStream outputStream = new FileOutputStream(file)) {
             outputStream.write(bytes);
             outputStream.flush();
-        } catch (IOException e) {
-            LOGGER.warn("Could not write file.", e);
+        } catch (SecurityException e) {
+            throw new IOException(e);
         }
     }
 
@@ -251,7 +253,7 @@ public final class Util {
      * @throws AukletException if schema validation fails.
      */
     @NonNull public static Json validateJson(@NonNull Json json, @NonNull String clazz) throws AukletException {
-        if (json == null) throw new AukletException("Input is null");
+        if (json == null) throw new AukletException("Input is null.");
         Json schemaValidation = getJsonSchema(clazz).validate(json);
         if (schemaValidation.is("ok", true)) return json;
         List<Json> errors = schemaValidation.at("errors").asJsonList();

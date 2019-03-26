@@ -81,15 +81,13 @@ public final class AukletApi {
     /** <p>Shuts down the internal HTTP client.</p> */
     public void shutdown() {
         synchronized (this.httpClient) {
-            if (this.httpClient != null) {
-                try {
-                    this.httpClient.dispatcher().executorService().shutdown();
-                    this.httpClient.connectionPool().evictAll();
-                    Cache cache = this.httpClient.cache();
-                    if (cache != null) cache.close();
-                } catch (IOException e) {
-                    LOGGER.warn("Error while shutting down Auklet API.", e);
-                }
+            try {
+                this.httpClient.dispatcher().executorService().shutdown();
+                this.httpClient.connectionPool().evictAll();
+                Cache cache = this.httpClient.cache();
+                if (cache != null) cache.close();
+            } catch (IOException e) {
+                LOGGER.warn("Error while shutting down Auklet API.", e);
             }
         }
     }
