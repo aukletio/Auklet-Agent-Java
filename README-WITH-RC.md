@@ -1,5 +1,17 @@
 # Changelog
 
+### [0.4.0-rc.1](https://github.com/aukletio/Auklet-Agent-Java/tree/0.4.0-rc.1)
+
+**Implemented enhancements:**
+
+- Rename config dir to .auklet [#62](https://github.com/aukletio/Auklet-Agent-Java/pull/62) ([rjenkinsjr](https://github.com/rjenkinsjr))
+- Hide MQTT disconnect errors [#60](https://github.com/aukletio/Auklet-Agent-Java/pull/60) ([rjenkinsjr](https://github.com/rjenkinsjr))
+
+**Fixed bugs:**
+
+- Miscellaneous fixes/cleanup [#63](https://github.com/aukletio/Auklet-Agent-Java/pull/63) ([rjenkinsjr](https://github.com/rjenkinsjr))
+- Fix retrieval of agent version [#61](https://github.com/aukletio/Auklet-Agent-Java/pull/61) ([rjenkinsjr](https://github.com/rjenkinsjr))
+
 ## [0.3.0](https://github.com/aukletio/Auklet-Agent-Java/tree/0.3.0)
 
 ### [0.3.0-rc.2](https://github.com/aukletio/Auklet-Agent-Java/tree/0.3.0-rc.2)
