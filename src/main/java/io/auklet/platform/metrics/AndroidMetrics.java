@@ -23,7 +23,7 @@ import java.io.IOException;
  * this class will always report {@code 0} for CPU usage.</p>
  */
 @ThreadSafe
-public final class AndroidMetrics {
+public final class AndroidMetrics extends AbstractMetrics {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AndroidMetrics.class);
     private final ActivityManager activityManager;
@@ -50,50 +50,11 @@ public final class AndroidMetrics {
     }
 
     /**
-     * <p>Returns a runnable task that periodically gets system CPU usage from the
-     * Android device on which the agent is running. Android has no APIs available to
-     * obtain this information, so we have to use a background thread to read the
-     * {@code /proc/stat} file.</p>
-     *
-     * @return {@code null} iff running on Android 8 or higher, in which case no
-     * background task will be executed.
-     */
-    @Nullable public Runnable calculateCpuUsage() {
-        if (Build.VERSION.SDK_INT >= 26) return null;
-        return new Runnable() {
-            @Override
-            public void run() {
-                // Obtain current CPU load.
-                String[] s;
-                try (BufferedReader reader = new BufferedReader(new FileReader("/proc/stat"))) {
-                    s = reader.readLine().split("[ ]+", 9);
-                } catch (IOException e) {
-                    LOGGER.warn("Unable to obtain CPU usage", e);
-                    return;
-                }
-                synchronized (lock) {
-                    work = Long.parseLong(s[1]) + Long.parseLong(s[2]) + Long.parseLong(s[3]);
-                    total = work + Long.parseLong(s[4]) + Long.parseLong(s[5]) +
-                            Long.parseLong(s[6]) + Long.parseLong(s[7]);
-                    // Calculate CPU Percentage
-                    if (totalBefore != 0) {
-                        workDiff = work - workBefore;
-                        totalDiff = total - totalBefore;
-                        cpuUsage = workDiff * 100 / (float) totalDiff;
-                    }
-                    totalBefore = total;
-                    workBefore = work;
-                }
-            }
-        };
-    }
-
-    /**
      * <p>Returns the memory usage of the OS on which this agent is running.</p>
      *
      * @return a non-negative value.
      */
-    public double getMemoryUsage() {
+    @Override public double getMemoryUsage() {
         ActivityManager.MemoryInfo memInfo = new ActivityManager.MemoryInfo();
         activityManager.getMemoryInfo(memInfo);
         return memInfo.availMem / (double) memInfo.totalMem * 100.0;
@@ -104,7 +65,7 @@ public final class AndroidMetrics {
      *
      * @return a non-negative value. If running on Android 8 or higher, will always be zero.
      */
-    public float getCpuUsage() {
+    @Override public float getCpuUsage() {
         synchronized (lock) {
             return cpuUsage;
         }

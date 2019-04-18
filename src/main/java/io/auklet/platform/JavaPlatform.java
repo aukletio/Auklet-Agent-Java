@@ -5,6 +5,7 @@ import edu.umd.cs.findbugs.annotations.Nullable;
 import io.auklet.AukletException;
 import io.auklet.misc.Util;
 import io.auklet.misc.OSMX;
+import io.auklet.platform.metrics.JavaMetrics;
 import net.jcip.annotations.Immutable;
 import org.msgpack.core.MessagePacker;
 import org.slf4j.Logger;
@@ -20,6 +21,11 @@ import java.util.List;
 public final class JavaPlatform extends AbstractPlatform {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JavaPlatform.class);
+    private final JavaMetrics metrics;
+
+    public JavaPlatform() {
+        metrics = new JavaMetrics(agent);
+    }
 
     @Override public List<String> getPossibleConfigDirs(@Nullable String fromConfig) {
         if (Util.isNullOrEmpty(fromConfig)) LOGGER.warn("Config dir not defined, will attempt to fallback on JVM system properties.");
@@ -42,27 +48,8 @@ public final class JavaPlatform extends AbstractPlatform {
 
     @Override public void addSystemMetrics(@NonNull MessagePacker msgpack) throws AukletException, IOException {
         if (msgpack == null) throw new AukletException("msgpack is null.");
-        // Calculate memory usage.
-        double memUsage;
-        long freeMem = OSMX.BEAN.getFreePhysicalMemorySize();
-        long totalMem = OSMX.BEAN.getTotalPhysicalMemorySize();
-        if (freeMem >= 0 && totalMem >= 0) {
-            memUsage = 100 * (1 - ((double) freeMem / (double) totalMem));
-        } else {
-            memUsage = 0d;
-        }
-        msgpack.packString("memoryUsage").packDouble(memUsage);
-
-        // Calculate CPU usage.
-        double cpuUsage;
-        double loadAvg = OSMX.BEAN.getSystemLoadAverage();
-        int processors = OSMX.BEAN.getAvailableProcessors();
-        if (loadAvg >= 0 && processors > 0) {
-            cpuUsage = 100 * (loadAvg / processors);
-        } else {
-            cpuUsage = 0d;
-        }
-        msgpack.packString("cpuUsage").packDouble(cpuUsage);
+        msgpack.packString("memoryUsage").packDouble(metrics.getMemoryUsage());
+        msgpack.packString("cpuUsage").packDouble(metrics.getCpuUsage());
     }
 
 }
