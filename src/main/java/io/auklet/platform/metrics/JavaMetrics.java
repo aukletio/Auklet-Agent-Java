@@ -27,6 +27,11 @@ public final class JavaMetrics extends AbstractMetrics {
     private static final Logger LOGGER = LoggerFactory.getLogger(JavaMetrics.class);
     public static Auklet agent;
 
+    /**
+     * <p>Constructor.</p>
+     * 
+     * @param aukletAgent
+     */
     public JavaMetrics(@NonNull Auklet aukletAgent) {
         agent = aukletAgent;
     }
@@ -59,6 +64,11 @@ public final class JavaMetrics extends AbstractMetrics {
         }
     }
 
+    /**
+     * <p>Returns the memory usage of the OS on which this agent is running.</p>
+     *
+     * @return a non-negative value.
+     */
     @Override public double getMemoryUsage() {
         long freeMemSize = OSMX.BEAN.getFreePhysicalMemorySize();
         if (freeMemSize == -1) {
