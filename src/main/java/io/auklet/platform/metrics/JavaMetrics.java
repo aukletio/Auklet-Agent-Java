@@ -1,22 +1,14 @@
 package io.auklet.platform.metrics;
 
-import android.app.ActivityManager;
-import android.content.Context;
-import android.os.Build;
-
 import edu.umd.cs.findbugs.annotations.NonNull;
-import edu.umd.cs.findbugs.annotations.Nullable;
 import io.auklet.AukletException;
 import io.auklet.Auklet;
 import io.auklet.misc.OSMX;
-import net.jcip.annotations.GuardedBy;
-import net.jcip.annotations.ThreadSafe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
@@ -29,8 +21,8 @@ public final class JavaMetrics extends AbstractMetrics {
 
     /**
      * <p>Constructor.</p>
-     * 
-     * @param aukletAgent
+     *
+     * @param aukletAgent Instance of the Auklet agent.
      */
     public JavaMetrics(@NonNull Auklet aukletAgent) {
         agent = aukletAgent;
@@ -41,7 +33,7 @@ public final class JavaMetrics extends AbstractMetrics {
      *
      * @return a non-negative value. If running on Android 8 or higher, will always be zero.
      */
-     public float getCpuUsage() {
+     @Override public float getCpuUsage() {
         long processors = OSMX.BEAN.getAvailableProcessors();
         if (processors == 0) {
             Runnable runnableCPU = this.calculateCpuUsage();
