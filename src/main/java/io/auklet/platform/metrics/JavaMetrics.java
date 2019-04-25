@@ -25,9 +25,9 @@ import java.util.concurrent.TimeUnit;
 public final class JavaMetrics extends AbstractMetrics {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JavaMetrics.class);
-    private static final Agent agent;
+    public static Auklet agent;
 
-    public JavaMetrics(@NonNull Agent aukletAgent) {
+    public JavaMetrics(@NonNull Auklet aukletAgent) {
         agent = aukletAgent;
     }
 
@@ -36,7 +36,7 @@ public final class JavaMetrics extends AbstractMetrics {
      *
      * @return a non-negative value. If running on Android 8 or higher, will always be zero.
      */
-     public float getCpuUsage(@NonNull Auklet agent) {
+     public float getCpuUsage() {
         long processors = OSMX.BEAN.getAvailableProcessors();
         if (processors == 0) {
             Runnable runnableCPU = this.calculateCpuUsage();
@@ -91,5 +91,4 @@ public final class JavaMetrics extends AbstractMetrics {
             return memUsage;
         }
     }
-
 }

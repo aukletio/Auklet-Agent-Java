@@ -21,7 +21,7 @@ import java.util.List;
 public final class JavaPlatform extends AbstractPlatform {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JavaPlatform.class);
-    private final JavaMetrics metrics;
+    public final JavaMetrics metrics;
 
     public JavaPlatform() {
         metrics = new JavaMetrics(agent);
