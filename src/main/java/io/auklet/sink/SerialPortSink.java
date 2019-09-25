@@ -68,7 +68,7 @@ public final class SerialPortSink extends AbstractSink {
         }
     }
 
-    @Override protected void write(@NonNull byte[] bytes) throws AukletException {
+    @Override protected void write(@NonNull byte[] bytes, @NonNull String topic) throws AukletException {
         synchronized (this.lock) {
             try {
                 int size = bytes.length;

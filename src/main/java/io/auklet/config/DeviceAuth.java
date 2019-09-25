@@ -108,6 +108,14 @@ public final class DeviceAuth extends AbstractJsonConfigFileFromApi {
         return "java/events/" + this.getOrganizationId() + "/" + this.getClientUsername();
     }
 
+    /**
+     * <p>Returns the MQTT topic that hsould be used for publishing datapoint messages.</p>
+     * @return never {@code null}.
+     */
+    @NonNull public String getMqttDatapointsTopic() {
+        return "datapoints/" + this.getOrganizationId() + "/" + this.getClientUsername();
+    }
+
     @Override protected Json readFromDisk() {
         try {
             // Read and decrypt the device auth file from disk.

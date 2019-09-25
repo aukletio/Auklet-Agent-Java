@@ -6,6 +6,7 @@ import edu.umd.cs.findbugs.annotations.Nullable;
 import io.auklet.core.AukletDaemonExecutor;
 import io.auklet.core.DataUsageMonitor;
 import io.auklet.core.AukletExceptionHandler;
+import io.auklet.core.Datapoint;
 import io.auklet.config.DeviceAuth;
 import io.auklet.core.AukletApi;
 import io.auklet.misc.Util;
@@ -20,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.util.*;
 import java.util.concurrent.*;
 
 /**
@@ -47,6 +49,7 @@ public final class Auklet {
     /** <p>The version of the Auklet agent JAR.</p> */
     public static final String VERSION;
     private static final Logger LOGGER = LoggerFactory.getLogger(Auklet.class);
+    private static final String DATAPOINT_ERROR = "Could not send datapoint.";
     private static final Object LOCK = new Object();
     private static final AukletDaemonExecutor DAEMON = new AukletDaemonExecutor(1, Util.createDaemonThreadFactory("Auklet"));
     @GuardedBy("LOCK") private static Auklet agent = null;
@@ -64,6 +67,7 @@ public final class Auklet {
     private final AbstractSink sink;
     private final DataUsageMonitor usageMonitor;
     private final Thread shutdownHook;
+
 
     static {
         // Extract Auklet agent version from the BuildConfig class.
@@ -269,6 +273,42 @@ public final class Auklet {
             DAEMON.submit(sendTask);
         } catch (RejectedExecutionException e) {
             LOGGER.error("Could not send event.", e);
+        }
+    }
+
+    /**
+     * <p>Sends the given string of dataString and dataType as a <i>datapoint</i>.</p>
+     *
+     * @param dataType User specified string which describes the provided data
+     * @param datapoint Any value. null, primitives/boxed primitives,
+     *                  BigIntegers, BigDecimals, Lists and Maps are all
+     *                  serialized into appropriate JSON-like structures.
+     *                  All other object types are rejected and cause an
+     *                  AukletException.
+     */
+    public static void send(@NonNull final String dataType, @Nullable final Object datapoint) {
+        LOGGER.debug("Scheduling datapoint send task.");
+        Runnable sendTask = new Runnable() {
+            @Override
+            public void run() {
+                synchronized (LOCK) {
+                    if (agent == null) {
+                        LOGGER.debug("Ignoring send request because agent is null.");
+                        return;
+                    }
+                }
+                try {
+                    agent.doSend(new Datapoint(dataType, datapoint));
+                } catch (AukletException e) {
+                    LOGGER.error(Auklet.DATAPOINT_ERROR, e);
+                }
+
+            }
+        };
+        try {
+            DAEMON.submit(sendTask);
+        } catch (RejectedExecutionException e) {
+            LOGGER.error(Auklet.DATAPOINT_ERROR, e);
         }
     }
 
@@ -511,6 +551,27 @@ public final class Auklet {
             }, 0, TimeUnit.SECONDS); // 5-second cooldown.
         } catch (AukletException e) {
             LOGGER.warn("Could not queue event send task.", e);
+        }
+    }
+
+    /**
+     * <p>Queues a task to submit the given datapoint to the data sink.</p>
+     * @param data
+     */
+    private void doSend(@NonNull final Datapoint data) {
+        try {
+            this.scheduleOneShotTask(new Runnable() {
+                @Override public void run() {
+                    try {
+                        LOGGER.debug("Sending datapoint: {}", data.toString());
+                        sink.send(data);
+                    } catch (AukletException e) {
+                        LOGGER.warn(Auklet.DATAPOINT_ERROR, e);
+                    }
+                }
+            }, 0, TimeUnit.SECONDS); // 5-second cooldown.
+        } catch (AukletException e) {
+            LOGGER.warn("Could not queue datapoint send task.", e);
         }
     }
 

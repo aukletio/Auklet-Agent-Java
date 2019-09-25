@@ -62,15 +62,14 @@ public final class AukletIoSink extends AbstractSink {
         }
     }
 
-    @Override protected void write(@NonNull byte[] bytes) throws AukletException {
+    @Override protected void write(@NonNull byte[] bytes, @NonNull String topic) throws AukletException {
         synchronized (this.lock) {
             try {
                 MqttMessage message = new MqttMessage(bytes);
-                message.setQos(1);
                 int size = bytes.length;
                 boolean willExceedLimit = this.getAgent().getUsageMonitor().willExceedLimit(size);
                 if (!willExceedLimit) {
-                    client.publish(this.getAgent().getDeviceAuth().getMqttEventsTopic(), message);
+                    client.publish(topic, message);
                     this.getAgent().getUsageMonitor().addMoreData(size);
                 }
             } catch (MqttException e) {
@@ -78,6 +77,7 @@ public final class AukletIoSink extends AbstractSink {
             }
         }
     }
+
 
     @Override public void shutdown() {
         synchronized (this.lock) {

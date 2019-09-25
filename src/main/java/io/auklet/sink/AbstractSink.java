@@ -5,6 +5,7 @@ import edu.umd.cs.findbugs.annotations.Nullable;
 import io.auklet.Auklet;
 import io.auklet.AukletException;
 import io.auklet.core.HasAgent;
+import io.auklet.core.Datapoint;
 import io.auklet.misc.Util;
 import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.ThreadSafe;
@@ -68,7 +69,31 @@ public abstract class AbstractSink extends HasAgent implements Sink {
             }
             byte[] payload = this.msgpack.toByteArray();
             if (payload == null || payload.length == 0) return;
-            this.write(payload);
+            this.write(payload, this.getAgent().getDeviceAuth().getMqttEventsTopic());
+        }
+    }
+
+    @Override public void send(@NonNull Datapoint datapoint) throws AukletException {
+        if (datapoint == null) {
+            throw new AukletException("datapoint cannot be null.");
+        }
+        synchronized (this.msgpack) {
+            this.msgpack.clear();
+            try {
+                this.initMessage(10);
+                this.msgpack
+                        .packString("timestamp").packLong(System.currentTimeMillis())
+                        // User defined type
+                        .packString("type").packString(datapoint.getDataType())
+                        .packString("payload");
+                datapoint.getValue().writeTo(this.msgpack);
+                this.msgpack.flush();
+            } catch (IOException e) {
+                throw new AukletException("Could not assemble datapoint message.", e);
+            }
+            byte[] payload = this.msgpack.toByteArray();
+            if (payload == null || payload.length == 0) return;
+            this.write(payload, this.getAgent().getDeviceAuth().getMqttDatapointsTopic());
         }
     }
 
@@ -76,9 +101,11 @@ public abstract class AbstractSink extends HasAgent implements Sink {
      * <p>Writes the given byte array to the underlying data sink.</p>
      *
      * @param bytes the byte array, never {@code null} or empty.
+     * @param topic the topic to send to, never {@code null} or empty.
+     *              Implementations are not required to use this parameter.
      * @throws AukletException if the data cannot be written.
      */
-    @GuardedBy("msgpack") protected abstract void write(@NonNull byte[] bytes) throws AukletException;
+    @GuardedBy("msgpack") protected abstract void write(@NonNull byte[] bytes, @NonNull String topic) throws AukletException;
 
     /**
      * <p>Starts assembling an Auklet-compatible MessagePack message, which is defined as a MessagePack
