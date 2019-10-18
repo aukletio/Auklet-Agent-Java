@@ -24,7 +24,7 @@ import net.jcip.annotations.ThreadSafe;
 public abstract class HasAgent {
 
     private final Object lock = new Object();
-    @GuardedBy("lock") private Auklet agent = null;
+    @GuardedBy("lock") public Auklet agent = null;
 
     /**
      * <p>Invokes the post-construction start logic for this object. Implementations are required to invoke
