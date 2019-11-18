@@ -110,7 +110,7 @@ public final class Auklet {
         LOUD_SECURITY_EXCEPTIONS = Boolean.valueOf(fromEnv) || Boolean.valueOf(fromProp);
         if (LOUD_SECURITY_EXCEPTIONS) {
             LOGGER.info("SecurityException loud logging is enabled.");
-        } else if (blockedEnv || blockedProp) {
+        } else if (blockedEnv && blockedProp) {
             // We only log the error if the end result is not true. This implies that exactly
             // one of the two calls resulted in a SecurityException and that the other call
             // was successful and returned true, so there would be no reason to log anything.
@@ -598,8 +598,7 @@ public final class Auklet {
      */
     private void doShutdown(boolean viaJvmHook) {
         LOGGER.info("Shutting down agent.");
-        boolean jvmHookIsShuttingDown = this.shutdownHook != null && viaJvmHook;
-        if (!jvmHookIsShuttingDown) Runtime.getRuntime().removeShutdownHook(this.shutdownHook);
+        if (!viaJvmHook && this.shutdownHook != null) Runtime.getRuntime().removeShutdownHook(this.shutdownHook);
         this.sink.shutdown();
         this.https.shutdown();
     }
