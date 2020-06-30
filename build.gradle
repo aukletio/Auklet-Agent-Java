@@ -5,19 +5,24 @@ plugins {
     id 'maven'
     id 'maven-publish'
     id 'com.jfrog.bintray' version '1.8.4'
+    id: 'jacoco'
 }
 
+// Project info
 group "${theGroup}"
 version "${theVersion}"
 description = 'Official Auklet SDK for Java and other JVM languages.'
 
+// Java version
 sourceCompatibility = 7
 targetCompatibility = 7
 
+// Dependencies
 repositories {
     jcenter()
     google()
 }
+
 dependencies {
     implementation "com.squareup.okhttp3:okhttp:3.12.0"
     implementation "com.squareup.okhttp3:logging-interceptor:3.12.0"
@@ -33,17 +38,26 @@ dependencies {
     // and those that do so may run into legal issues if they distribute it alongside an
     // Oracle JRE/JDK. See https://stackoverflow.com/a/36198568 for details.
     // Also, SpotBugs Annotations requires Java 8.
-    compileOnly "com.github.spotbugs:spotbugs-annotations:3.1.10"
-    // purejavacomm requires Java 8. If you are using purejavacomm, you should also include
-    // sysout-over-slf4j so that purejavacomm's logging uses SLF4J.
+    implementation "com.github.spotbugs:spotbugs-annotations:3.1.10"
+
     compileOnly "com.github.purejavacomm:purejavacomm:1.0.1.RELEASE"
     compileOnly "uk.org.lidalia:sysout-over-slf4j:1.0.2"
     compileOnly("com.google.android:android:4.1.1.4") {
         transitive = false
     }
     testRuntimeOnly "org.slf4j:slf4j-simple:1.7.25"
+
+    testCompile 'org.junit.jupiter:junit-jupiter-api:5.3.1'
+    testCompile 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
+    testCompile 'org.hamcrest:hamcrest-junit:2.0.0.0'
+    testCompile 'uk.org.lidalia:slf4j-test:1.1.0'
+    testCompile 'org.mockito:mockito-inline:2.23.4'
+    testCompile("com.google.android:android-test:4.1.1.4") {
+        transitive = false
+    }
 }
 
+// Compilation configuration
 allprojects {
     gradle.projectsEvaluated {
         tasks.withType(JavaCompile) {
@@ -101,23 +115,27 @@ if (JavaVersion.current().isJava9Compatible()) {
     }
 }
 
+// Test configuration
 test {
     testLogging.showStandardStreams = true
+    useJUnitPlatform()
 }
 
+jacocoTestReport {
+    reports {
+        xml.enabled true
+        html.enabled true
+        csv.enabled true
+    }
+}
+
+// Javadoc configuration
 javadoc {
     source = sourceSets.main.allJava
     classpath = configurations.compileClasspath
-    if (JavaVersion.current().isJava9Compatible()) {
-        options.addBooleanOption('html5', true)
-    }
-    if (JavaVersion.current().isJava8Compatible()) {
-        // We get class version mismatch warnings on Java 7 that would cause
-        // Javadoc to fail with this option enabled, so we don't enable it on 7.
-        options.addBooleanOption('Xwerror', true)
-    }
 }
 
+// Packaging configurations
 task sourcesJar(type: Jar, dependsOn: classes) {
     classifier = 'sources'
     from sourceSets.main.allSource
@@ -141,6 +159,7 @@ jar {
     }
 }
 
+// Deployment configurations
 def pomConfig = {
     licenses {
         license {
